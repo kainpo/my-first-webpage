@@ -1,2 +1,479 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>マイ日記</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .entry-form {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        input[type="date"], input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type="date"]:focus, input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+            font-family: inherit;
+        }
+
+        .mood-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .mood-btn {
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .mood-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .mood-btn.active {
+            background: #4facfe;
+            color: white;
+            border-color: #4facfe;
+        }
+
+        .save-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .entries-section {
+            margin-top: 40px;
+        }
+
+        .entries-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .entries-header h2 {
+            color: #495057;
+            font-size: 1.8em;
+        }
+
+        .search-box {
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 20px;
+            width: 250px;
+            font-size: 14px;
+        }
+
+        .entry-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .entry-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .entry-date {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+
+        .entry-mood {
+            background: #f8f9fa;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .entry-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .entry-content {
+            color: #6c757d;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .entry-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .edit-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .edit-btn:hover, .delete-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .no-entries {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            margin: 40px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .main-content {
+                padding: 20px;
+            }
+            
+            .entries-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✨ マイ日記 ✨</h1>
+            <p>毎日の思い出を大切に記録しましょう</p>
+        </div>
+
+        <div class="main-content">
+            <div class="entry-form">
+                <h2 style="margin-bottom: 20px; color: #495057;">新しい日記を書く</h2>
+                
+                <div class="form-group">
+                    <label for="entry-date">日付</label>
+                    <input type="date" id="entry-date">
+                </div>
+
+                <div class="form-group">
+                    <label for="entry-title">タイトル</label>
+                    <input type="text" id="entry-title" placeholder="今日の出来事...">
+                </div>
+
+                <div class="form-group">
+                    <label>今日の気分</label>
+                    <div class="mood-selector">
+                        <button type="button" class="mood-btn" data-mood="😊">😊 嬉しい</button>
+                        <button type="button" class="mood-btn" data-mood="😢">😢 悲しい</button>
+                        <button type="button" class="mood-btn" data-mood="😴">😴 眠い</button>
+                        <button type="button" class="mood-btn" data-mood="😡">😡 怒り</button>
+                        <button type="button" class="mood-btn" data-mood="😎">😎 最高</button>
+                        <button type="button" class="mood-btn" data-mood="🤔">🤔 考え中</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="entry-content">日記の内容</label>
+                    <textarea id="entry-content" placeholder="今日はどんな一日でしたか？思い出や感想を自由に書いてください..."></textarea>
+                </div>
+
+                <button type="button" class="save-btn" onclick="saveEntry()">📝 保存する</button>
+            </div>
+
+            <div class="entries-section">
+                <div class="entries-header">
+                    <h2>過去の日記</h2>
+                    <input type="text" class="search-box" id="search-input" placeholder="🔍 日記を検索...">
+                </div>
+                <div id="entries-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 日記データを保存する配列
+        let diaryEntries = [];
+        let editingIndex = -1;
+
+        // 現在の日付を設定
+        document.getElementById('entry-date').valueAsDate = new Date();
+
+        // 気分選択の処理
+        document.querySelectorAll('.mood-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // 検索機能
+        document.getElementById('search-input').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            displayEntries(searchTerm);
+        });
+
+        // 日記を保存する関数
+        function saveEntry() {
+            const date = document.getElementById('entry-date').value;
+            const title = document.getElementById('entry-title').value;
+            const content = document.getElementById('entry-content').value;
+            const activeMoodBtn = document.querySelector('.mood-btn.active');
+            const mood = activeMoodBtn ? activeMoodBtn.dataset.mood : '';
+
+            if (!date || !title || !content) {
+                alert('日付、タイトル、内容をすべて入力してください。');
+                return;
+            }
+
+            const entry = {
+                date: date,
+                title: title,
+                content: content,
+                mood: mood,
+                timestamp: new Date().toISOString()
+            };
+
+            if (editingIndex >= 0) {
+                // 編集モード
+                diaryEntries[editingIndex] = entry;
+                editingIndex = -1;
+                document.querySelector('.save-btn').textContent = '📝 保存する';
+            } else {
+                // 新規追加
+                diaryEntries.unshift(entry);
+            }
+
+            // フォームをリセット
+            document.getElementById('entry-title').value = '';
+            document.getElementById('entry-content').value = '';
+            document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('entry-date').valueAsDate = new Date();
+
+            // 日記リストを更新
+            displayEntries();
+            
+            // 成功メッセージ
+            alert('日記が保存されました！');
+        }
+
+        // 日記リストを表示する関数
+        function displayEntries(searchTerm = '') {
+            const entriesList = document.getElementById('entries-list');
+            
+            if (diaryEntries.length === 0) {
+                entriesList.innerHTML = '<div class="no-entries">まだ日記が書かれていません。最初の日記を書いてみましょう！</div>';
+                return;
+            }
+
+            let filteredEntries = diaryEntries;
+            if (searchTerm) {
+                filteredEntries = diaryEntries.filter(entry => 
+                    entry.title.toLowerCase().includes(searchTerm) ||
+                    entry.content.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (filteredEntries.length === 0) {
+                entriesList.innerHTML = '<div class="no-entries">検索結果が見つかりませんでした。</div>';
+                return;
+            }
+
+            entriesList.innerHTML = filteredEntries.map((entry, index) => {
+                const originalIndex = diaryEntries.indexOf(entry);
+                return `
+                    <div class="entry-item">
+                        <div class="entry-header">
+                            <div class="entry-date">${formatDate(entry.date)}</div>
+                            <div class="entry-mood">${entry.mood}</div>
+                        </div>
+                        <div class="entry-title">${entry.title}</div>
+                        <div class="entry-content">${entry.content.substring(0, 100)}${entry.content.length > 100 ? '...' : ''}</div>
+                        <div class="entry-actions">
+                            <button class="edit-btn" onclick="editEntry(${originalIndex})">✏️ 編集</button>
+                            <button class="delete-btn" onclick="deleteEntry(${originalIndex})">🗑️ 削除</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 日付をフォーマットする関数
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ja-JP', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+            });
+        }
+
+        // 日記を編集する関数
+        function editEntry(index) {
+            const entry = diaryEntries[index];
+            
+            document.getElementById('entry-date').value = entry.date;
+            document.getElementById('entry-title').value = entry.title;
+            document.getElementById('entry-content').value = entry.content;
+            
+            // 気分を選択
+            document.querySelectorAll('.mood-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.mood === entry.mood) {
+                    btn.classList.add('active');
+                }
+            });
+
+            editingIndex = index;
+            document.querySelector('.save-btn').textContent = '📝 更新する';
+            
+            // フォームまでスクロール
+            document.querySelector('.entry-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 日記を削除する関数
+        function deleteEntry(index) {
+            if (confirm('この日記を削除してもよろしいですか？')) {
+                diaryEntries.splice(index, 1);
+                displayEntries();
+            }
+        }
+
+        // 初期表示
+        displayEntries();
+    </script>
+</body>
+</html>
